@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
+import { useEffect } from 'react'
 import JobCard from '../components/JobCard'
+import axios from 'axios'
 
 const AllJobs = () => {
+  useEffect(()=> {
+    axios.get("")
+  }, [])
   return (
     <div className='container px-6 py-10 mx-auto min-h-[calc(100vh-306px)] flex flex-col justify-between'>
       <div>
