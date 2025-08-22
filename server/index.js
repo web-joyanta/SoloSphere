@@ -25,6 +25,12 @@ async function run() {
     const database = client.db("solosphere");
     const jobsCollection = database.collection("jobs");
 
+    // get all jobs data form bd
+    app.get("/jobs", async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result);
+    })
+
     // save a job data in bd
     app.post("/add-job", async (req, res) => {
       const job = req.body;
