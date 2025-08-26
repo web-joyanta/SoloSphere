@@ -13,7 +13,11 @@ const JobCard = ({ job }) => {
         <span className='text-xs font-light text-gray-800 '>
           Deadline: {format(new Date(deadline), "P")}
         </span>
-        <span className='px-3 py-1 text-[8px] text-blue-800 uppercase bg-blue-200 rounded-full '>
+        <span className={`px-3 py-1 text-[8px]
+          ${category === "Web Development" && "text-blue-500 bg-blue-100/60"}
+          ${category === "Digital Marketing" && "text-red-500 bg-red-100/60"}
+          ${category === "Graphics Design" && "text-green-500 bg-green-100/60"}
+          uppercase rounded-full`}>
           {category}
         </span>
       </div>
