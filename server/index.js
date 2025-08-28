@@ -39,10 +39,31 @@ async function run() {
       res.send(result);
     })
 
+    // get a single job data by id form bd
+    app.get("/job/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.findOne(query)
+      res.send(result);
+    })
+
     // save a job data in bd
     app.post("/add-job", async (req, res) => {
       const job = req.body;
       const result = await jobsCollection.insertOne(job);
+      res.send(result);
+    })
+
+    //  job data updated in bd
+    app.put("/update-job/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const jobData = req.body;
+      const updated = {
+        $set: jobData,
+      };
+      const option = { upsert: true };
+      const result = await jobsCollection.updateOne(filter, updated, option);
       res.send(result);
     })
 
