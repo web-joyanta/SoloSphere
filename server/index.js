@@ -24,6 +24,7 @@ async function run() {
   try {
     const database = client.db("solosphere");
     const jobsCollection = database.collection("jobs");
+    const bidsCollection = database.collection("bids");
 
     // get all jobs data form bd
     app.get("/jobs", async (req, res) => {
@@ -51,6 +52,26 @@ async function run() {
     app.post("/add-job", async (req, res) => {
       const job = req.body;
       const result = await jobsCollection.insertOne(job);
+      res.send(result);
+    })
+
+    // save a bid data in bd
+    app.post("/add-bid", async (req, res) => {
+      const bidData = req.body;
+      // validation: user already bib
+      const query = { email: bidData.email, jobId: bidData.jobId }
+      const alreadyExist = await bidsCollection.findOne(query);
+      if (alreadyExist) {
+        return res.status(400).send("User already bid on this job!")
+      }
+      //1. save data in bid collection
+      const result = bidsCollection.insertOne(bidData);
+      //2. increase bid count in jobs collection
+      const filter = { _id: new ObjectId(bidData.jobId) };
+      const update = {
+        $inc: { bid_count: 1 },
+      };
+      const updateBidCount = await jobsCollection.updateOne(filter, update);
       res.send(result);
     })
 

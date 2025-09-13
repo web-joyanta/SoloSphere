@@ -4,7 +4,7 @@ import { useContext, useEffect, useState } from 'react'
 
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../providers/AuthProvider'
 import toast from 'react-hot-toast'
 
@@ -13,6 +13,7 @@ const JobDetails = () => {
   const [job, setJob] = useState({});
   const { id } = useParams();
   const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchJobData();
@@ -23,32 +24,46 @@ const JobDetails = () => {
     setJob(data);
     // setStartDate(new Date(data.deadline));
   }
-  const { title, deadline, category, minPrice, maxPrice, description, buyer } = job || {};
-  
-  const handleSubmit = e => {
+  const { title, deadline, category, minPrice, maxPrice, description, buyer, _id } = job || {};
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const from = e.target;
     const price = from.price.value;
     const email = user?.email;
     const comment = from.comment.value;
+    const jobId = _id;
 
     // check bid permissions validation
-    if (user?.email === buyer?.email) {
-      return toast.error("Action not permitted!")
-    }
+    // if (user?.email === buyer?.email) {
+    //   return toast.error("Action not permitted!")
+    // }
     // cross dateline validation
     if (compareAsc(new Date(), new Date(deadline)) === 1) {
       return toast.error("Deadline Crossed, Bidding Forbidden!");
     }
     // offer dateline validation
-    if (compareAsc(new Date(startDate), new Date()) === 1) {
+    if (compareAsc(new Date(startDate), new Date(deadline)) === 1) {
       return toast.error("Offer a date within deadline!")
     }
     // max > min price validation
     if (price > maxPrice) {
       return toast.error("Offer less or at least equal maximum price!");
     }
-    console.table({ price, email, comment })
+
+    const bidData = { price, email, comment, deadline, jobId }
+
+    try {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/add-bid`, bidData);
+      from.reset();
+      toast.success("Bid Successful!!!");
+      navigate("/my-bids");
+      console.log(data);
+    }
+    catch (err) {
+      toast.error(err.response.data);
+      console.log(err.response.data);
+    }
 
   }
   return (
@@ -91,7 +106,7 @@ const JobDetails = () => {
               </p>
             </div>
             <div className='rounded-full object-cover overflow-hidden w-14 h-14'>
-              <img
+              <img referrerPolicy='no referrer'
                 src={buyer?.photo}
                 alt=''
               />
