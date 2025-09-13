@@ -35,9 +35,9 @@ const JobDetails = () => {
     const jobId = _id;
 
     // check bid permissions validation
-    // if (user?.email === buyer?.email) {
-    //   return toast.error("Action not permitted!")
-    // }
+    if (user?.email === buyer?.email) {
+      return toast.error("Action not permitted!");
+    }
     // cross dateline validation
     if (compareAsc(new Date(), new Date(deadline)) === 1) {
       return toast.error("Deadline Crossed, Bidding Forbidden!");
@@ -51,7 +51,7 @@ const JobDetails = () => {
       return toast.error("Offer less or at least equal maximum price!");
     }
 
-    const bidData = { price, email, comment, deadline, jobId }
+    const bidData = { title, category, price, email, comment, deadline: startDate, jobId, status: 'Pending' }
 
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/add-bid`, bidData);
@@ -62,7 +62,6 @@ const JobDetails = () => {
     }
     catch (err) {
       toast.error(err.response.data);
-      console.log(err.response.data);
     }
 
   }

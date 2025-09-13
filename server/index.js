@@ -75,6 +75,14 @@ async function run() {
       res.send(result);
     })
 
+    // get user all bids
+    app.get("/bids/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email }
+      const result = await bidsCollection.find(query).toArray();
+      res.send(result);
+    })
+
     //  job data updated in bd
     app.put("/update-job/:id", async (req, res) => {
       const id = req.params.id;
