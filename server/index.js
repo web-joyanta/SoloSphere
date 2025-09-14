@@ -77,15 +77,16 @@ async function run() {
 
     // get user all bids
     app.get("/bids/:email", async (req, res) => {
+      const isBuyer = req.query.buyer;
       const email = req.params.email;
-      const query = { email }
-      const result = await bidsCollection.find(query).toArray();
-      res.send(result);
-    })
-    // get user all bids requests
-    app.get("/bid-requests/:email", async (req, res) => {
-      const buyer = req.params.email;
-      const query = { buyer };
+
+      let query = {};
+      if (isBuyer) {
+        query.buyer = email;
+      } else {
+        query.email = email;
+      }
+
       const result = await bidsCollection.find(query).toArray();
       res.send(result);
     })

@@ -13,7 +13,7 @@ const BidRequests = () => {
   }, [user])
 
   const fetchAllBidRequests = async () => {
-    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/bid-requests/${user?.email}`)
+    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/bids/${user?.email}?buyer=true`);
     setBids(data);
   }
   return (
