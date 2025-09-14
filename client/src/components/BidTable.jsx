@@ -9,7 +9,7 @@ const BidTable = ({ bid }) => {
 
             <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>{format(deadline, "P")}</td>
 
-            <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>{price}</td>
+            <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>${price}</td>
             <td className='px-4 py-4 text-sm whitespace-nowrap'>
                 <div className='flex items-center gap-x-2'>
                     <p className={`px-3 py-1

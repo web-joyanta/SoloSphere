@@ -51,7 +51,7 @@ const JobDetails = () => {
       return toast.error("Offer less or at least equal maximum price!");
     }
 
-    const bidData = { title, category, price, email, comment, deadline: startDate, jobId, status: 'Pending' }
+    const bidData = { title, category, price, email, comment, deadline: startDate, jobId, status: 'Pending', buyer: buyer?.email }
 
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/add-bid`, bidData);
