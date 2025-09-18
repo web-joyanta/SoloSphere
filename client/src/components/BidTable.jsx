@@ -1,8 +1,8 @@
 import { format } from "date-fns";
 import PropTypes from 'prop-types';
 
-const BidTable = ({ bid }) => {
-    const { title, category, price, deadline, status } = bid || {};
+const BidTable = ({ bid, handleStatusChange }) => {
+    const { _id, title, category, price, deadline, status } = bid || {};
     return (
         <tr>
             <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>{title}</td>
@@ -32,9 +32,11 @@ const BidTable = ({ bid }) => {
                 </div>
             </td>
             <td className='px-4 py-4 text-sm whitespace-nowrap'>
-                <button
+                {/* status complete button */}
+                <button onClick={() => handleStatusChange(_id, status, "Completed")}
                     title='Mark Complete'
-                    className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
+                    disabled={status !== "In Progress"}
+                    className='disabled:hover:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
                 >
                     <svg
                         xmlns='http://www.w3.org/2000/svg'
@@ -58,5 +60,6 @@ const BidTable = ({ bid }) => {
 
 BidTable.propTypes = {
     bid: PropTypes.object,
+    handleStatusChange: PropTypes.func,
 }
 export default BidTable;

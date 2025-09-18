@@ -6,7 +6,7 @@ import BidRequestsTable from "../components/BidRequestsTable";
 const BidRequests = () => {
   const { user } = useContext(AuthContext);
   const [bids, setBids] = useState([]);
-  console.log(bids)
+  // console.log(bids)
 
   useEffect(() => {
     fetchAllBidRequests();
@@ -15,6 +15,21 @@ const BidRequests = () => {
   const fetchAllBidRequests = async () => {
     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/bids/${user?.email}?buyer=true`);
     setBids(data);
+  }
+
+  const handleStatusChange = async (id, prevStatus, status) => {
+    if (prevStatus === status || prevStatus === "Completed") {
+      return console.log("Not Allowed");
+    }
+    try {
+      const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update${id}`, { status })
+      console.log(data);
+      // refresh ui
+      fetchAllBidRequests();
+    }
+    catch (err) {
+      console.log(err.message)
+    }
   }
   return (
     <section className='container px-4 mx-auto my-12'>
@@ -85,7 +100,7 @@ const BidRequests = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  {bids.map(bid => <BidRequestsTable key={bid._id} bid={bid}></BidRequestsTable>)}
+                  {bids.map(bid => <BidRequestsTable key={bid._id} bid={bid} handleStatusChange={handleStatusChange}></BidRequestsTable>)}
                 </tbody>
               </table>
             </div>

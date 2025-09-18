@@ -104,6 +104,18 @@ async function run() {
       res.send(result);
     })
 
+    // bid status update
+    app.patch("/bid-status-update:id", async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateStatus = {
+        $set: { status },
+      }
+      const result = await bidsCollection.updateOne(filter, updateStatus);
+      res.send(result);
+    })
+
     // database data delete
     app.delete("/job/:id", async (req, res) => {
       const id = req.params.id;

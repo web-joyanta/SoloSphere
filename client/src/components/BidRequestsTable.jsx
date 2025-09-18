@@ -1,8 +1,8 @@
 import { format } from 'date-fns';
 import PropTypes from 'prop-types';
 
-const BidRequestsTable = ({ bid }) => {
-    const { title, category, price, deadline, status, email } = bid || {};
+const BidRequestsTable = ({ bid, handleStatusChange }) => {
+    const { _id, title, category, price, deadline, status, email } = bid || {};
     return (
         <tr>
             <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
@@ -38,7 +38,8 @@ const BidRequestsTable = ({ bid }) => {
             </td>
             <td className='px-4 py-4 text-sm whitespace-nowrap'>
                 <div className='flex items-center gap-x-6'>
-                    <button className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
+                    {/* Accept Button*/}
+                    <button onClick={() => handleStatusChange(_id, status, "In Progress")} className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
                             fill='none'
@@ -54,8 +55,8 @@ const BidRequestsTable = ({ bid }) => {
                             />
                         </svg>
                     </button>
-
-                    <button className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
+                    {/* Reject Button */}
+                    <button onClick={() => handleStatusChange(_id, status, "Rejected")} className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'>
                         <svg
                             xmlns='http://www.w3.org/2000/svg'
                             fill='none'
@@ -79,6 +80,7 @@ const BidRequestsTable = ({ bid }) => {
 
 BidRequestsTable.propTypes = {
     bid: PropTypes.object,
+    handleStatusChange: PropTypes.func,
 }
 
 export default BidRequestsTable;

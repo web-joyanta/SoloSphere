@@ -17,6 +17,21 @@ const MyBids = () => {
     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/bids/${user?.email}`);
     setBids(data);
   }
+
+  const handleStatusChange = async (id, prevStatus, status) => {
+    if (prevStatus !== "In Progress") {
+      return console.log("Not Allowed");
+    }
+    try {
+      const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update${id}`, { status })
+      console.log(data);
+      // refresh ui
+       fetchAllBids();
+    }
+    catch (err) {
+      console.log(err.message)
+    }
+  }
   return (
     <section className='container px-4 mx-auto my-12'>
       <div className='flex items-center gap-x-3'>
@@ -79,7 +94,7 @@ const MyBids = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  {bids.map(bid => <BidTable key={bid._id} bid={bid}></BidTable>)}
+                  {bids.map(bid => <BidTable key={bid._id} bid={bid} handleStatusChange={handleStatusChange}></BidTable>)}
                 </tbody>
               </table>
             </div>
