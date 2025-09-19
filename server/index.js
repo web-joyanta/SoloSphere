@@ -27,8 +27,21 @@ async function run() {
     const bidsCollection = database.collection("bids");
 
     // get all jobs data form bd
-    app.get("/jobs", async (req, res) => {
-      const result = await jobsCollection.find().toArray();
+    app.get("/all-jobs", async (req, res) => {
+      const filter = req.query.filter;
+      const search = req.query.search;
+      const sort = req.query.sort;
+      // set sort option
+      let sortOption = {};
+      if (sort) {
+        sortOption = { sort: { deadline: sort === "asc" ? 1 : -1 } };
+      }
+      // set query option
+      let query = { title: { $regex: search, $options: 'i' } };
+      if (filter) {
+        query.category = filter;
+      }
+      const result = await jobsCollection.find(query, sortOption).toArray();
       res.send(result);
     })
 
@@ -113,6 +126,21 @@ async function run() {
         $set: { status },
       }
       const result = await bidsCollection.updateOne(filter, updateStatus);
+
+      // If status is "In Progress", reject all other bids for the same job
+      // if (status === "In Progress") {
+      //   const currentBid = await bidsCollection.findOne(filter);
+      //   if (currentBid && currentBid.jobId) {
+      //     await bidsCollection.updateMany(
+      //       {
+      //         jobId: currentBid.jobId,
+      //         _id: { $ne: new ObjectId(id) }
+      //       },
+      //       { $set: { status: "Rejected" } }
+      //     );
+      //   }
+      // }
+
       res.send(result);
     })
 
