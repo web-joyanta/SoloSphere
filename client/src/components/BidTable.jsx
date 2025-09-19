@@ -23,10 +23,17 @@ const BidTable = ({ bid, handleStatusChange }) => {
             </td>
             <td className='px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap'>
                 <div
-                    className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 bg-yellow-100/60 text-yellow-500`}
-                >
+                    className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 
+                        ${status === "Pending" && "bg-yellow-100/60 text-yellow-500"}
+                        ${status === "In Progress" && "bg-blue-100/60 text-blue-500"}
+                        ${status === "Completed" && "bg-green-100/60 text-green-500"}
+                        ${status === "Rejected" && "bg-red-100/60 text-red-500"}`}>
                     <span
-                        className={`h-1.5 w-1.5 rounded-full bg-yellow-500 `}
+                        className={`h-1.5 w-1.5 rounded-full 
+                            ${status === "Pending" && "bg-yellow-500"}
+                            ${status === "In Progress" && "bg-blue-500"}
+                            ${status === "Completed" && "bg-green-500"}
+                            ${status === "Rejected" && "bg-red-500"} `}
                     ></span>
                     <h2 className='text-sm font-normal '>{status}</h2>
                 </div>
@@ -36,7 +43,7 @@ const BidTable = ({ bid, handleStatusChange }) => {
                 <button onClick={() => handleStatusChange(_id, status, "Completed")}
                     title='Mark Complete'
                     disabled={status !== "In Progress"}
-                    className='disabled:hover:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
+                    className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'
                 >
                     <svg
                         xmlns='http://www.w3.org/2000/svg'

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { useState } from "react";
 import BidTable from "../components/BidTable";
+import toast from "react-hot-toast";
 
 const MyBids = () => {
   const { user } = useContext(AuthContext);
@@ -25,11 +26,12 @@ const MyBids = () => {
     try {
       const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update${id}`, { status })
       console.log(data);
+      toast.success(`Status ${status}`);
       // refresh ui
        fetchAllBids();
     }
     catch (err) {
-      console.log(err.message)
+      toast.error(err.message);
     }
   }
   return (
