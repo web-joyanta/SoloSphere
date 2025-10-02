@@ -1,13 +1,15 @@
 import { useContext } from "react"
 import { AuthContext } from "../providers/AuthProvider"
 import { useEffect } from "react";
-import axios from "axios";
 import { useState } from "react";
 import BidTable from "../components/BidTable";
 import toast from "react-hot-toast";
+import useAxiosSecure from "../hooks/useAxiosSecure";
+
 
 const MyBids = () => {
   const { user } = useContext(AuthContext);
+  const axiosSecure = useAxiosSecure();
   const [bids, setBids] = useState([]);
 
   useEffect(() => {
@@ -15,7 +17,7 @@ const MyBids = () => {
   }, [user])
 
   const fetchAllBids = async () => {
-    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/bids/${user?.email}`);
+    const { data } = await axiosSecure.get(`/bids/${user?.email}`);
     setBids(data);
   }
 
@@ -24,11 +26,11 @@ const MyBids = () => {
       return console.log("Not Allowed");
     }
     try {
-      const { data } = await axios.patch(`${import.meta.env.VITE_API_URL}/bid-status-update${id}`, { status })
+      const { data } = await axiosSecure.patch(`/bid-status-update${id}`, { status })
       console.log(data);
       toast.success(`Status ${status}`);
       // refresh ui
-       fetchAllBids();
+      fetchAllBids();
     }
     catch (err) {
       toast.error(err.message);

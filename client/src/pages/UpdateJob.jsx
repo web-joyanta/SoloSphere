@@ -6,9 +6,11 @@ import 'react-datepicker/dist/react-datepicker.css'
 import { useNavigate, useParams } from 'react-router-dom'
 import { AuthContext } from '../providers/AuthProvider'
 import toast from 'react-hot-toast'
+import useAxiosSecure from '../hooks/useAxiosSecure'
 
 const UpdateJob = () => {
   const [startDate, setStartDate] = useState(new Date());
+  const axiosSecure = useAxiosSecure();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const { id } = useParams();
@@ -47,7 +49,7 @@ const UpdateJob = () => {
     }
 
     try {
-      await axios.put(`${import.meta.env.VITE_API_URL}/update-job/${id}`, formData);
+      await axiosSecure.put(`/update-job/${id}`, formData);
       form.reset();
       toast.success("Data Updated Successfully!!!");
       navigate("/my-posted-jobs")

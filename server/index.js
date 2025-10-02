@@ -1,13 +1,18 @@
 const express = require('express')
 const cors = require('cors')
+const cookieParser = require('cookie-parser')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 require('dotenv').config()
-
+const jwt = require('jsonwebtoken')
 const port = process.env.PORT || 9000
 const app = express()
 
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  credentials: true,
+}))
 app.use(express.json())
+app.use(cookieParser());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.z1ypfcb.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`
 
@@ -20,11 +25,48 @@ const client = new MongoClient(uri, {
   },
 })
 
+// verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token
+  if (!token) {
+    return res.status(401).send({ message: "Unauthorized Access!" });
+  }
+  jwt.verify(token, process.env.privateKey, (err, decoded) => {
+    if(err){
+      return res.status(401).send({ message: "Unauthorized Access!" });
+    }
+    req.user = decoded;
+  })
+  next();
+}
+
 async function run() {
   try {
     const database = client.db("solosphere");
     const jobsCollection = database.collection("jobs");
     const bidsCollection = database.collection("bids");
+
+    // generate token
+    app.post('/jwt', async (req, res) => {
+      const email = req.body;
+      const token = jwt.sign(email, process.env.privateKey, { expiresIn: "365d" });
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      })
+        .send({ success: true });
+    })
+
+    // logout || clear token for browser
+    app.post('/logout', async (req, res) => {
+      res.clearCookie('token', {
+        maxAge: 0,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+      })
+        .send({ success: true });
+    })
 
     // get all jobs data form bd
     app.get("/all-jobs", async (req, res) => {
@@ -45,10 +87,21 @@ async function run() {
       res.send(result);
     })
 
+    // get all jobs home tabs 
+    app.get("/jobs", async (req, res) => {
+      const result = await jobsCollection.find().toArray();
+      res.send(result)
+    })
+
     // get email jobs posted data
-    app.get("/jobs/:email", async (req, res) => {
+    app.get("/jobs/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { "buyer.email": email };
+      const decodedEmail = req.user?.email;
+      
+      if(decodedEmail !== email){
+        return res.status(403).send({message: 'Forbidden Access!'});
+      }
       const result = await jobsCollection.find(query).toArray();
       res.send(result);
     })
@@ -89,9 +142,14 @@ async function run() {
     })
 
     // get user all bids
-    app.get("/bids/:email", async (req, res) => {
+    app.get("/bids/:email", verifyToken, async (req, res) => {
       const isBuyer = req.query.buyer;
       const email = req.params.email;
+      const decodedEmail = req.user?.email;
+      
+      if(decodedEmail !== email){
+        return res.status(403).send({message: 'Forbidden Access!'});
+      }
 
       let query = {};
       if (isBuyer) {
@@ -105,7 +163,7 @@ async function run() {
     })
 
     //  job data updated in bd
-    app.put("/update-job/:id", async (req, res) => {
+    app.put("/update-job/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) }
       const jobData = req.body;
@@ -118,7 +176,7 @@ async function run() {
     })
 
     // bid status update
-    app.patch("/bid-status-update:id", async (req, res) => {
+    app.patch("/bid-status-update:id",verifyToken, async (req, res) => {
       const id = req.params.id;
       const { status } = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -145,7 +203,7 @@ async function run() {
     })
 
     // database data delete
-    app.delete("/job/:id", async (req, res) => {
+    app.delete("/job/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await jobsCollection.deleteOne(query);
