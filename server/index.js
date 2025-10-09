@@ -32,7 +32,7 @@ const verifyToken = (req, res, next) => {
     return res.status(401).send({ message: "Unauthorized Access!" });
   }
   jwt.verify(token, process.env.privateKey, (err, decoded) => {
-    if(err){
+    if (err) {
       return res.status(401).send({ message: "Unauthorized Access!" });
     }
     req.user = decoded;
@@ -70,6 +70,10 @@ async function run() {
 
     // get all jobs data form bd
     app.get("/all-jobs", async (req, res) => {
+      const page = parseInt(req.query.page);
+      const size = parseInt(req.query.size);
+      const skip = (page - 1) * size;
+      
       const filter = req.query.filter;
       const search = req.query.search;
       const sort = req.query.sort;
@@ -83,7 +87,7 @@ async function run() {
       if (filter) {
         query.category = filter;
       }
-      const result = await jobsCollection.find(query, sortOption).toArray();
+      const result = await jobsCollection.find(query, sortOption).skip(skip).limit(size).toArray();
       res.send(result);
     })
 
@@ -93,14 +97,20 @@ async function run() {
       res.send(result)
     })
 
+    // jobs count for pagination
+    app.get("/jobs-count", async (req, res) => {
+      const count = await jobsCollection.countDocuments();
+      res.send({ count });
+    })
+
     // get email jobs posted data
     app.get("/jobs/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { "buyer.email": email };
       const decodedEmail = req.user?.email;
-      
-      if(decodedEmail !== email){
-        return res.status(403).send({message: 'Forbidden Access!'});
+
+      if (decodedEmail !== email) {
+        return res.status(403).send({ message: 'Forbidden Access!' });
       }
       const result = await jobsCollection.find(query).toArray();
       res.send(result);
@@ -146,9 +156,9 @@ async function run() {
       const isBuyer = req.query.buyer;
       const email = req.params.email;
       const decodedEmail = req.user?.email;
-      
-      if(decodedEmail !== email){
-        return res.status(403).send({message: 'Forbidden Access!'});
+
+      if (decodedEmail !== email) {
+        return res.status(403).send({ message: 'Forbidden Access!' });
       }
 
       let query = {};
@@ -176,7 +186,7 @@ async function run() {
     })
 
     // bid status update
-    app.patch("/bid-status-update:id",verifyToken, async (req, res) => {
+    app.patch("/bid-status-update:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const { status } = req.body;
       const filter = { _id: new ObjectId(id) };
