@@ -12,25 +12,27 @@ const AllJobs = () => {
 
 
   const [count, setCount] = useState(0);
-  const [itemsPerPage, setItemPerPage] = useState(8);
+  const [itemsPerPage] = useState(8);
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(count / itemsPerPage);
   const pages = [...Array(totalPages).keys()].map(num => num + 1);
 
   useEffect(() => {
     FetchAllJobs();
-    getCount();
-  }, [filter, search, sort, currentPage, itemsPerPage]);
+  }, [filter, search, sort, currentPage]);
 
   const FetchAllJobs = async () => {
     const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}&search=${search}&sort=${sort}`);
     setJobs(data);
   }
 
-  const getCount = async () => {
-    const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs-count`);
-    setCount(data?.count)
-  }
+  useEffect(() => {
+    const getCount = async () => {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs-count`);
+      setCount(data?.count)
+    };
+    getCount();
+  }, []);
 
   const handleReset = () => {
     setFilter('');
@@ -92,7 +94,7 @@ const AllJobs = () => {
         {/* Pagination section start */}
         <div className='flex justify-center mt-12'>
           {/* previous button */}
-          <button className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'>
+          <button onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1} className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'>
             <div className='flex items-center -mx-1'>
               <svg
                 xmlns='http://www.w3.org/2000/svg'
@@ -116,13 +118,13 @@ const AllJobs = () => {
           {pages.map(btnNum => (
             <button onClick={() => setCurrentPage(btnNum)}
               key={btnNum}
-              className={`hidden px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
+              className={`${currentPage === btnNum ? 'bg-blue-500 text-white' : ''} hidden px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
             >
               {btnNum}
             </button>
           ))}
           {/* next button */}
-          <button className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'>
+          <button onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages} className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'>
             <div className='flex items-center -mx-1'>
               <span className='mx-1'>Next</span>
 

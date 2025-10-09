@@ -93,8 +93,14 @@ async function run() {
 
     // get all jobs home tabs 
     app.get("/jobs", async (req, res) => {
-      const result = await jobsCollection.find().toArray();
-      res.send(result)
+      const categories = ["Web Development", "Graphics Design", "Digital Marketing"];
+      const result = [];
+
+      for(const category of categories){
+        const items = await jobsCollection.find({category}).limit(8).toArray();
+        result.push(...items);
+      }
+      res.send(result);
     })
 
     // jobs count for pagination
