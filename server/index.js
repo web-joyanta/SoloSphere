@@ -8,7 +8,10 @@ const port = process.env.PORT || 9000
 const app = express()
 
 app.use(cors({
-  origin: ['http://localhost:5173'],
+  origin: [
+    'http://localhost:5173',
+    'https://solosphere-f0f15.web.app'
+  ],
   credentials: true,
 }))
 app.use(express.json())
@@ -73,7 +76,7 @@ async function run() {
       const page = parseInt(req.query.page);
       const size = parseInt(req.query.size);
       const skip = (page - 1) * size;
-      
+
       const filter = req.query.filter;
       const search = req.query.search;
       const sort = req.query.sort;
@@ -96,8 +99,8 @@ async function run() {
       const categories = ["Web Development", "Graphics Design", "Digital Marketing"];
       const result = [];
 
-      for(const category of categories){
-        const items = await jobsCollection.find({category}).limit(8).toArray();
+      for (const category of categories) {
+        const items = await jobsCollection.find({ category }).limit(8).toArray();
         result.push(...items);
       }
       res.send(result);
@@ -226,10 +229,10 @@ async function run() {
       res.send(result);
     })
     // Send a ping to confirm a successful connection
-    await client.db('admin').command({ ping: 1 })
-    console.log(
-      'Pinged your deployment. You successfully connected to MongoDB!'
-    )
+    // await client.db('admin').command({ ping: 1 })
+    // console.log(
+    //   'Pinged your deployment. You successfully connected to MongoDB!'
+    // )
   } finally {
     // Ensures that the client will close when you finish/error
   }
